@@ -69,6 +69,15 @@ namespace KnxService5
 
             });
 
+            try
+            {
+                xmlfile.IsProcessed = 1;
+                service.UpdateXmlFile(xmlfile);
+            }catch(Exception e)
+            {
+                _log.Error(e.Message);
+            }
+
             return telegramsList;
         }
 

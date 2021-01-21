@@ -23,6 +23,7 @@ namespace KnxService5
         const string ProcessApiEnding = @"/api/KnxProcesses/";
 
         #region Methods
+
         public string getFileName()
         {
             return knxProcess.ProcessedFile;
@@ -33,9 +34,14 @@ namespace KnxService5
             return Task.Run(async() => await GetXmlFileApi()).Result;
         }
 
+        public void UpdateXmlFile(Xmlfile xmlfile)
+        {
+            Task.Run(async () => await PutXMlFile(xmlfile)).Wait();
+        }
+
         public KnxTelegram PostKnxTelegram(KnxTelegram newTelegram)
         {
-            return Task.Run(async () => await PostEncodedTelegram(newTelegram)).Wait();
+            return Task.Run(async () => await PostEncodedTelegram(newTelegram)).Result;
         }
 
         public void PostProcess(KnxProcess init)
@@ -58,9 +64,11 @@ namespace KnxService5
 
             Task.Run(async () => await PutProcessUpadte(knxProcess)).Wait();
         }
+
         #endregion
 
         #region API servcie handling
+
         private static async Task<Xmlfile> GetXmlFileApi()
         {
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + XmlApiEnding + "/GetNotProcessedXmlFiles");
@@ -80,6 +88,28 @@ namespace KnxService5
                 // Handle error result
                 throw new Exception();
                 return null;
+            }
+        }
+
+
+        private static async Task PutXMlFile(Xmlfile xmlfile)
+        {
+            var payload = JsonConvert.SerializeObject(xmlfile);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, apiUrl + XmlApiEnding);
+
+            requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+            var responseMessage = await httpClient.SendAsync(requestMessage);
+
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                var result = await responseMessage.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                // Handle error result
+                throw new Exception();
             }
         }
 
