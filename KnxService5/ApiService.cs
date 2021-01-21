@@ -35,7 +35,7 @@ namespace KnxService5
 
         public KnxTelegram PostKnxTelegram(KnxTelegram newTelegram)
         {
-            Task.Run(async () => await PostEncodedTelegram(newTelegram)).Wait();
+            return Task.Run(async () => await PostEncodedTelegram(newTelegram)).Wait();
         }
 
         public void PostProcess(KnxProcess init)
@@ -98,14 +98,13 @@ namespace KnxService5
             {
                 var resultString = await responseMessage.Content.ReadAsStringAsync();
                 result = JsonConvert.DeserializeObject<KnxTelegram>(resultString);
-
             }
             else
             {
                 // Handle error result
                 throw new Exception();
-                return;
             }
+            return result;
         }
 
         private static async Task<KnxProcess> Postrocess(KnxProcess process)

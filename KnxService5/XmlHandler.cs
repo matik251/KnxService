@@ -6,11 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Topshelf.Logging;
 
 namespace KnxService5
 {
-    public static class XmlHandler
+    public class XmlHandler
     {
+        static readonly LogWriter _log = HostLogger.Get<XmlHandler>();
         public static ConcurrentBag<int> TelegramsList = new ConcurrentBag<int>();
 
         public static void ProcessXml(ApiService service)
@@ -26,7 +28,7 @@ namespace KnxService5
             }
             catch (Exception e)
             {
-
+                _log.Error(e.Message);
             }
         }
 
@@ -57,16 +59,17 @@ namespace KnxService5
 
                     telegramsList.Add(service.PostKnxTelegram(telegram));
 
+                    service.UpdateProcessState(telegramsList.Count());
+
                 }
                 catch (Exception e)
                 {
-
+                    _log.Error(e.Message);
                 }
 
             });
 
-            return 
-
+            return telegramsList;
         }
 
     }
