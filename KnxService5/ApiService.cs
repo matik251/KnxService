@@ -21,8 +21,9 @@ namespace KnxService5
         const string XmlApiEnding = @"/api/XmlFiles/";
         const string TelegramApiEnding = @"/api/KnxTelegrams/";
         const string ProcessApiEnding = @"/api/KnxProcesses/";
+        const string DecodedTelegramApiEnding = @"/api/DecodedTelegrams/";
 
-        #region Methods
+        #region Methods XML Handler
 
         public string getFileName()
         {
@@ -39,11 +40,9 @@ namespace KnxService5
             Task.Run(async () => await PutXMlFile(xmlfile)).Wait();
         }
 
-        public KnxTelegram PostKnxTelegram(KnxTelegram newTelegram)
-        {
-            return Task.Run(async () => await PostEncodedTelegram(newTelegram)).Result;
-        }
+        #endregion
 
+        #region Mehods Process
         public void PostProcess(KnxProcess init)
         {
             knxProcess = Task.Run(async () => await Postrocess(init)).Result;
@@ -67,7 +66,35 @@ namespace KnxService5
 
         #endregion
 
+        #region Methods Telegrams
+
+        public KnxTelegram PostKnxTelegram(KnxTelegram newTelegram)
+        {
+            return Task.Run(async () => await PostEncodedTelegram(newTelegram)).Result;
+        }
+
+        public KnxTelegram GetKnxTelegramToDecode()
+        {
+            return Task.Run(async () => await GetEncodedTelegram()).Result;
+        }
+
+        public void UpdateKnxTelegramState(KnxTelegram updated)
+        {
+            Task.Run(async () => await UpdateProcessedStateTelegram(updated)).Wait();
+        }
+
+        public DecodedTelegram PostDecodedTelegram(DecodedTelegram decodedTelegram)
+        {
+            return Task.Run(async () => await PostDecodedTelegramApi(decodedTelegram)).Result;
+        }
+
+
+        #endregion
+
+
         #region API servcie handling
+
+        //XML
 
         private static async Task<Xmlfile> GetXmlFileApi()
         {
@@ -91,7 +118,6 @@ namespace KnxService5
             }
         }
 
-
         private static async Task PutXMlFile(Xmlfile xmlfile)
         {
             var payload = JsonConvert.SerializeObject(xmlfile);
@@ -112,6 +138,8 @@ namespace KnxService5
                 throw new Exception();
             }
         }
+
+        //Zakodowane telegramy
 
         private static async Task<KnxTelegram> PostEncodedTelegram(KnxTelegram telegram)
         {
@@ -136,6 +164,107 @@ namespace KnxService5
             }
             return result;
         }
+
+        private static async Task<KnxTelegram> GetEncodedTelegram()
+        {
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + TelegramApiEnding + "/GetNotProcessedXmlFiles");
+
+            requestMessage.Content = new StringContent("application/json");
+
+            var responseMessage = await httpClient.SendAsync(requestMessage);
+
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                var result = await responseMessage.Content.ReadAsStringAsync();
+
+                return JsonConvert.DeserializeObject<KnxTelegram>(result);
+            }
+            else
+            {
+                // Handle error result
+                throw new Exception();
+                return null;
+            }
+        }
+
+        private static async Task UpdateProcessedStateTelegram(KnxTelegram processed)
+        {
+            var payload = JsonConvert.SerializeObject(processed);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, apiUrl + ProcessApiEnding + processed.Tid);
+
+            requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+            var responseMessage = await httpClient.SendAsync(requestMessage);
+
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                var result = await responseMessage.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                // Handle error result
+                throw new Exception();
+                return;
+            }
+        }
+
+        //Zdekodowane telgramy
+
+        private static async Task<DecodedTelegram> PostDecodedTelegramApi(DecodedTelegram telegram)
+        {
+            var result = new DecodedTelegram();
+            var payload = JsonConvert.SerializeObject(telegram);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + DecodedTelegramApiEnding);
+
+            requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+            var responseMessage = await httpClient.SendAsync(requestMessage);
+
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                var resultString = await responseMessage.Content.ReadAsStringAsync();
+                result = JsonConvert.DeserializeObject<DecodedTelegram>(resultString);
+            }   
+            else
+            {
+                // Handle error result
+                throw new Exception();
+            }
+            return result;
+        }
+
+        //Adres Grupowy
+
+        private static async Task<KnxGroupAddress> GetGroupAddressInfo(string groupAddress )
+        {
+            var result = new KnxGroupAddress();
+            groupAddress = groupAddress.Replace("/", "%2F");
+            var parameters = new Dictionary<string, string> { { "groupAddress", groupAddress } };
+            var encodedContent = new FormUrlEncodedContent(parameters);
+
+            var requestMessage = new HttpRequestMessage( HttpMethod.Get, apiUrl + TelegramApiEnding + "?" + encodedContent);
+
+            requestMessage.Content = new StringContent( "application/json");
+
+            var responseMessage = await httpClient.SendAsync(requestMessage);
+
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                var resultString = await responseMessage.Content.ReadAsStringAsync();
+                result = JsonConvert.DeserializeObject<KnxGroupAddress>(resultString);
+            }
+            else
+            {
+                // Handle error result
+                throw new Exception();
+            }
+            return result;
+        }
+
+
+        //Procesy
 
         private static async Task<KnxProcess> Postrocess(KnxProcess process)
         {
