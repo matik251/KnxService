@@ -28,6 +28,7 @@
     <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
     <PackageReference Include="Topshelf" Version="4.3.0" />
     <PackageReference Include="Topshelf.Serilog" Version="4.3.0" />
+    <PackageReference Include="TopShelf.StartParameters" Version="1.0.2" />
   </ItemGroup>
 
 </Project>

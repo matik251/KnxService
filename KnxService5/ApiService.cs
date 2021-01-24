@@ -117,7 +117,7 @@ namespace KnxService5
 
         private async Task<Xmlfile> GetXmlFileApi()
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiUrl + XmlApiEnding + "/GetNotProcessedXmlFiles/0");
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiUrl + XmlApiEnding + "/GetNotProcessedXmlFiles");
 
             requestMessage.Content = new StringContent("application/json");
 

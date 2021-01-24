@@ -16,14 +16,19 @@ namespace KnxService5
         readonly bool _throwUnhandled;
         static readonly LogWriter _log = HostLogger.Get<KnxService>();
 
+        public bool XmlReader = false;
+        public bool TelegramDecoder = false;
+
         ApiService apiService = new ApiService();
         KnxProcess process;
 
-        public KnxService(bool throwOnStart, bool throwOnStop, bool throwUnhandled)
+        public KnxService(bool throwOnStart, bool throwOnStop, bool throwUnhandled, bool XmlReader, bool TelegramDecoder)
         {
             _throwOnStart = throwOnStart;
             _throwOnStop = throwOnStop;
             _throwUnhandled = throwUnhandled;
+            XmlReader = this.XmlReader;
+            TelegramDecoder = this.TelegramDecoder;
         }
 
         public static IPAddress LocalIpAddress()
@@ -50,24 +55,38 @@ namespace KnxService5
             }
             var ip = LocalIpAddress();
 
+
             process = new KnxProcess();
             process.ProcessIp = ip.ToString();
-            process.ProcessName = "Test 24";
-            process.ProcessType = "XML-Handler";
-            process.ProcessedFile = "";
-            process.ActualTelegramNr = 0;
-            process.TotalTelegramNr = 0;
-            apiService.PostProcess(process);
 
-            ThreadPool.QueueUserWorkItem(x =>
+            if (XmlReader)
             {
-                XmlHandler.ProcessXml(apiService);
-            });
+                process.ProcessName = "XR+" + DateTime.Now.ToString();
+                process.ProcessType = "XmlReader";
+                process.ProcessedFile = "";
+                process.ActualTelegramNr = 0;
+                process.TotalTelegramNr = 0;
+                apiService.PostProcess(process);
 
-            //ThreadPool.QueueUserWorkItem(x =>
-            //{
-            //    EmiDecoder.ProcessTelegrams(apiService);
-            //});
+                ThreadPool.QueueUserWorkItem(x =>
+                {
+                    XmlHandler.ProcessXml(apiService);
+                });
+            }
+            else if (TelegramDecoder)
+            {
+                process.ProcessName = "TD+" + DateTime.Now.ToString();
+                process.ProcessType = "TelegramDecoder";
+                process.ProcessedFile = "";
+                process.ActualTelegramNr = 0;
+                process.TotalTelegramNr = 0;
+                apiService.PostProcess(process);
+
+                ThreadPool.QueueUserWorkItem(x =>
+                {
+                    EmiDecoder.ProcessTelegrams(apiService);
+                });
+            }
 
             _log.Info("KnxService Started");
 

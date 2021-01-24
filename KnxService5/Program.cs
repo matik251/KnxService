@@ -1,11 +1,14 @@
 ﻿using Serilog;
 using System;
 using Topshelf;
+using Topshelf.Logging;
+using Topshelf.StartParameters;
 
 namespace KnxService5
 {
     class Program
     {
+
         static int Main()
         {
             return (int)HostFactory.Run(x =>
@@ -18,15 +21,20 @@ namespace KnxService5
 
                 x.UseAssemblyInfoForServiceInfo();
 
+                x.EnableStartParameters();
+
+
                 bool throwOnStart = false;
                 bool throwOnStop = false;
                 bool throwUnhandled = false;
+                bool XmlReader = false;
+                bool TelegramDecoder = false;
 
-                x.Service(settings => new KnxService(throwOnStart, throwOnStop, throwUnhandled), s =>
-                {
-                    s.BeforeStartingService(_ => Console.WriteLine("BeforeStart"));
-                    s.BeforeStoppingService(_ => Console.WriteLine("BeforeStop"));
-                });
+                x.Service(settings => new KnxService(throwOnStart, throwOnStop, throwUnhandled, XmlReader, TelegramDecoder), s =>
+                        {
+                            s.BeforeStartingService(_ => Console.WriteLine("BeforeStart"));
+                            s.BeforeStoppingService(_ => Console.WriteLine("BeforeStop"));
+                        });
 
                 x.SetStartTimeout(TimeSpan.FromSeconds(10));
                 x.SetStopTimeout(TimeSpan.FromSeconds(10));
@@ -40,6 +48,10 @@ namespace KnxService5
                     r.OnCrashOnly();
                     r.SetResetPeriod(1);
                 });
+
+
+                x.WithStartParameter("XmlReader", n => XmlReader = (n.Equals("1") || (n.Equals("true"))));
+                x.WithStartParameter("TelegramDecoder", n => TelegramDecoder = (n.Equals("1") || (n.Equals("true"))));
 
                 x.AddCommandLineSwitch("throwonstart", v => throwOnStart = v);
                 x.AddCommandLineSwitch("throwonstop", v => throwOnStop = v);
