@@ -44,8 +44,8 @@ namespace KnxService5
                 }
                 else
                 {
-                    Thread.Sleep(300000);
                     _log.Error("NoLogsToDecode");
+                    Thread.Sleep(300000);
                 }
             }
         }

@@ -23,7 +23,7 @@ namespace KnxService5
                 try
                 {
                     var xmlfile = service.GetXmlfile();
-                    if(xmlfile == null)
+                    if(xmlfile != null)
                     {
                         xmlfile.IsProcessed = (xmlfile.IsProcessed == null ? 0 : xmlfile.IsProcessed.Value + 1);
                         service.UpdateXmlFile(xmlfile);
@@ -36,8 +36,8 @@ namespace KnxService5
                     }
                     else
                     {
-                        Thread.Sleep(300000);
                         _log.Error("NoLogsToDecode");
+                        Thread.Sleep(300000);
                     }
                 }
                 catch (Exception e)
