@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Topshelf.Logging;
 
@@ -12,17 +13,33 @@ namespace KnxService5
     {
         static readonly LogWriter _log = HostLogger.Get<EmiDecoder>();
 
-        public static void ProcessTelegram(ApiService service)
+        public static void ProcessTelegrams(ApiService service)
         {
-            try
+            while (true)
             {
-                var telegram = service.GetKnxTelegramToDecode();
+                KnxTelegram knxTelegram = null;
+                DecodedTelegram decoded = null;
+                try
+                {
+                    knxTelegram = service.GetKnxTelegramToDecode();
 
-                var temp = DecodeEmi(telegram, service);
-            }
-            catch (Exception e)
-            {
-                _log.Error(e.Message);
+                    decoded = DecodeEmi(knxTelegram, service);
+                }
+                catch (Exception e)
+                {
+                    _log.Error(e.Message);
+                }
+                if (knxTelegram != null)
+                {
+                    knxTelegram.Processed = 1;
+                    service.PostKnxTelegram(knxTelegram);
+                    service.PostDecodedTelegram(decoded);
+                }
+                else
+                {
+                    Thread.Sleep(300000);
+                    _log.Error("NoLogsToDecode");
+                }
             }
         }
 
@@ -30,23 +47,12 @@ namespace KnxService5
         {
             var decoded = new DecodedTelegram();
 
-            //TOOD
+            decoded = DataDecoder.GetDatapoint(service, encoded);
 
             return decoded;
         }
 
-        private static DecodedTelegram DecodeDatapoint(DecodedTelegram current)
-        {
-            //TODO
-            return current;
-        }
-
-        enum Separator
-        {
-            //TODO uzupelnic z kartki
-            Comma = ',',
-            Tab = '\t',
-            Space = ' '
-        }
     }
+
+
 }

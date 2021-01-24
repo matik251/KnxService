@@ -12,7 +12,7 @@ namespace KnxService5
 {
     public class ApiService 
     {
-        static HttpClient httpClient;
+        static HttpClient httpClient = new HttpClient();
 
         private KnxProcess knxProcess;
 
@@ -88,6 +88,11 @@ namespace KnxService5
             return Task.Run(async () => await PostDecodedTelegramApi(decodedTelegram)).Result;
         }
 
+        public KnxGroupAddress GetGroupAddressInfo(string groupAddress)
+        {
+            return Task.Run(async () => await GetGroupAddressInfoApi(groupAddress)).Result;
+        }
+
 
         #endregion
 
@@ -98,7 +103,7 @@ namespace KnxService5
 
         private static async Task<Xmlfile> GetXmlFileApi()
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + XmlApiEnding + "/GetNotProcessedXmlFiles");
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiUrl + XmlApiEnding + "GetNotProcessedXmlFiles");
 
             requestMessage.Content = new StringContent("application/json");
 
@@ -167,7 +172,7 @@ namespace KnxService5
 
         private static async Task<KnxTelegram> GetEncodedTelegram()
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + TelegramApiEnding + "/GetNotProcessedXmlFiles");
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiUrl + TelegramApiEnding + "GetNotProcessed");
 
             requestMessage.Content = new StringContent("application/json");
 
@@ -237,7 +242,7 @@ namespace KnxService5
 
         //Adres Grupowy
 
-        private static async Task<KnxGroupAddress> GetGroupAddressInfo(string groupAddress )
+        private static async Task<KnxGroupAddress> GetGroupAddressInfoApi(string groupAddress )
         {
             var result = new KnxGroupAddress();
             groupAddress = groupAddress.Replace("/", "%2F");

@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Topshelf.Logging;
@@ -17,18 +18,32 @@ namespace KnxService5
 
         public static void ProcessXml(ApiService service)
         {
-            try
+            while (true)
             {
-                var xmlfile = service.GetXmlfile();
-                if (xmlfile.TelegramsCount.HasValue)
+                try
                 {
-                    service.UpdateProcessState(xmlfile.FileName, 0, (int)xmlfile.TelegramsCount);
+                    var xmlfile = service.GetXmlfile();
+                    if(xmlfile == null)
+                    {
+                        xmlfile.IsProcessed = (xmlfile.IsProcessed == null ? 0 : xmlfile.IsProcessed.Value + 1);
+                        service.UpdateXmlFile(xmlfile);
+                        if (xmlfile.TelegramsCount.HasValue)
+                        {
+                            xmlfile.TelegramsCount = xmlfile.ToString().Where(c => c.Equals('<')).Count() - 2;
+                            service.UpdateProcessState(xmlfile.FileName, 0, (int)xmlfile.TelegramsCount);
+                        }
+                        var temp = ReadFileTelegrams(xmlfile, service);
+                    }
+                    else
+                    {
+                        Thread.Sleep(300000);
+                        _log.Error("NoLogsToDecode");
+                    }
                 }
-                var temp = ReadFileTelegrams(xmlfile, service);
-            }
-            catch (Exception e)
-            {
-                _log.Error(e.Message);
+                catch (Exception e)
+                {
+                    _log.Error(e.Message);
+                }
             }
         }
 

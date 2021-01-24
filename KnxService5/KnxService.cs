@@ -12,6 +12,8 @@ namespace KnxService5
         readonly bool _throwUnhandled;
         static readonly LogWriter _log = HostLogger.Get<KnxService>();
 
+        ApiService apiService = new ApiService();
+
         public KnxService(bool throwOnStart, bool throwOnStop, bool throwUnhandled)
         {
             _throwOnStart = throwOnStart;
@@ -32,19 +34,18 @@ namespace KnxService5
                 _log.Info("Throwing as requested");
                 throw new InvalidOperationException("Throw on Start Requested");
             }
+            
 
             ThreadPool.QueueUserWorkItem(x =>
             {
-                Thread.Sleep(3000);
-
-
-                if (_throwUnhandled)
-                    throw new InvalidOperationException("Throw Unhandled In Random Thread");
-
-                _log.Info("Requesting stop");
-
-                hostControl.Stop();
+                XmlHandler.ProcessXml(apiService);
             });
+
+            ThreadPool.QueueUserWorkItem(x =>
+            {
+                EmiDecoder.ProcessTelegrams(apiService);
+            });
+
             _log.Info("SampleService Started");
 
             Thread.Sleep(10000);

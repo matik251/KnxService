@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Kaenx.Konnect" Version="0.0.18" />
+    <PackageReference Include="Knx.Falcon.Sdk" Version="5.7.426" />
+    <PackageReference Include="KNX.net" Version="1.1.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.2">
       <PrivateAssets>all</PrivateAssets>
