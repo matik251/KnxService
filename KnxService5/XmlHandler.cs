@@ -44,6 +44,7 @@ namespace KnxService5
                 {
                     _log.Error(e.Message);
                     _log.Error("NoLogsToDecode");
+                    service.UpdateProcessState("NoLogsToDecode", 0, 0);
                     Thread.Sleep(300000);
                 }
             }
