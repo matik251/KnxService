@@ -31,9 +31,16 @@ namespace KnxService5
                 }
                 if (knxTelegram != null)
                 {
-                    knxTelegram.Processed = 1;
-                    service.PostKnxTelegram(knxTelegram);
-                    service.PostDecodedTelegram(decoded);
+                    try
+                    {
+                        knxTelegram.Processed = 1;
+                        service.PutKnaTelegram(knxTelegram);
+                        service.PostDecodedTelegram(decoded);
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e.Message);
+                    }
                 }
                 else
                 {

@@ -23,7 +23,7 @@ namespace KnxService5
 
         public bool Start(HostControl hostControl)
         {
-            _log.Info("SampleService Starting...");
+            _log.Info("KnxService Starting...");
 
             hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(10));
 
@@ -41,12 +41,12 @@ namespace KnxService5
                 XmlHandler.ProcessXml(apiService);
             });
 
-            ThreadPool.QueueUserWorkItem(x =>
-            {
-                EmiDecoder.ProcessTelegrams(apiService);
-            });
+            //ThreadPool.QueueUserWorkItem(x =>
+            //{
+            //    EmiDecoder.ProcessTelegrams(apiService);
+            //});
 
-            _log.Info("SampleService Started");
+            _log.Info("KnxService Started");
 
             Thread.Sleep(10000);
             return true;
@@ -54,7 +54,7 @@ namespace KnxService5
 
         public bool Stop(HostControl hostControl)
         {
-            _log.Info("SampleService Stopped");
+            _log.Info("KnxService Stopped");
 
             if (_throwOnStop)
                 throw new InvalidOperationException("Throw on Stop Requested!");
@@ -64,14 +64,14 @@ namespace KnxService5
 
         public bool Pause(HostControl hostControl)
         {
-            _log.Info("SampleService Paused");
+            _log.Info("KnxService Paused");
 
             return true;
         }
 
         public bool Continue(HostControl hostControl)
         {
-            _log.Info("SampleService Continued");
+            _log.Info("KnxService Continued");
 
             return true;
         }

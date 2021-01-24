@@ -12,16 +12,25 @@ namespace KnxService5
 {
     public class ApiService 
     {
-        static HttpClient httpClient = new HttpClient();
+
+        HttpClient httpClient;
+
+        public ApiService()
+        {
+            HttpClientHandler handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            httpClient = new HttpClient(handler);
+        }
 
         private KnxProcess knxProcess;
 
         const string apiUrl = @"https://192.168.1.200:1200";
 
-        const string XmlApiEnding = @"/api/XmlFiles/";
-        const string TelegramApiEnding = @"/api/KnxTelegrams/";
-        const string ProcessApiEnding = @"/api/KnxProcesses/";
-        const string DecodedTelegramApiEnding = @"/api/DecodedTelegrams/";
+        const string XmlApiEnding = @"/api/XmlFiles";
+        const string TelegramApiEnding = @"/api/KnxTelegrams";
+        const string ProcessApiEnding = @"/api/KnxProcesses";
+        const string DecodedTelegramApiEnding = @"/api/DecodedTelegrams";
 
         #region Methods XML Handler
 
@@ -88,6 +97,11 @@ namespace KnxService5
             return Task.Run(async () => await PostDecodedTelegramApi(decodedTelegram)).Result;
         }
 
+        public void PutKnaTelegram(KnxTelegram knxTelegram)
+        {
+            Task.Run(async () => await PutEncodedTelegram(knxTelegram)).Wait();
+        }
+
         public KnxGroupAddress GetGroupAddressInfo(string groupAddress)
         {
             return Task.Run(async () => await GetGroupAddressInfoApi(groupAddress)).Result;
@@ -101,9 +115,9 @@ namespace KnxService5
 
         //XML
 
-        private static async Task<Xmlfile> GetXmlFileApi()
+        private async Task<Xmlfile> GetXmlFileApi()
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiUrl + XmlApiEnding + "GetNotProcessedXmlFiles");
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiUrl + XmlApiEnding + "/GetNotProcessedXmlFiles");
 
             requestMessage.Content = new StringContent("application/json");
 
@@ -123,7 +137,7 @@ namespace KnxService5
             }
         }
 
-        private static async Task PutXMlFile(Xmlfile xmlfile)
+        private async Task PutXMlFile(Xmlfile xmlfile)
         {
             var payload = JsonConvert.SerializeObject(xmlfile);
 
@@ -146,11 +160,12 @@ namespace KnxService5
 
         //Zakodowane telegramy
 
-        private static async Task<KnxTelegram> PostEncodedTelegram(KnxTelegram telegram)
+        private async Task<KnxTelegram> PostEncodedTelegram(KnxTelegram telegram)
         {
             var result = new KnxTelegram();
             var payload = JsonConvert.SerializeObject(telegram);
-           
+            payload = payload.Replace("\\\"Tid\\\":null,","");
+
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + TelegramApiEnding);
 
             requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
@@ -170,9 +185,31 @@ namespace KnxService5
             return result;
         }
 
-        private static async Task<KnxTelegram> GetEncodedTelegram()
+        private async Task PutEncodedTelegram(KnxTelegram telegram)
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiUrl + TelegramApiEnding + "GetNotProcessed");
+            var payload = JsonConvert.SerializeObject(telegram);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, apiUrl + TelegramApiEnding + "/PutKnxTelegrams/" + telegram.Tid);
+
+            requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+            var responseMessage = await httpClient.SendAsync(requestMessage);
+
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                var resultString = await responseMessage.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                // Handle error result
+                throw new Exception();
+            }
+        }
+
+
+        private async Task<KnxTelegram> GetEncodedTelegram()
+        {
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiUrl + TelegramApiEnding + "/GetNotProcessed");
 
             requestMessage.Content = new StringContent("application/json");
 
@@ -192,11 +229,11 @@ namespace KnxService5
             }
         }
 
-        private static async Task UpdateProcessedStateTelegram(KnxTelegram processed)
+        private async Task UpdateProcessedStateTelegram(KnxTelegram processed)
         {
             var payload = JsonConvert.SerializeObject(processed);
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Put, apiUrl + ProcessApiEnding + processed.Tid);
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, apiUrl + ProcessApiEnding +"/" +processed.Tid);
 
             requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
 
@@ -216,7 +253,7 @@ namespace KnxService5
 
         //Zdekodowane telgramy
 
-        private static async Task<DecodedTelegram> PostDecodedTelegramApi(DecodedTelegram telegram)
+        private async Task<DecodedTelegram> PostDecodedTelegramApi(DecodedTelegram telegram)
         {
             var result = new DecodedTelegram();
             var payload = JsonConvert.SerializeObject(telegram);
@@ -242,14 +279,14 @@ namespace KnxService5
 
         //Adres Grupowy
 
-        private static async Task<KnxGroupAddress> GetGroupAddressInfoApi(string groupAddress )
+        private async Task<KnxGroupAddress> GetGroupAddressInfoApi(string groupAddress )
         {
             var result = new KnxGroupAddress();
             groupAddress = groupAddress.Replace("/", "%2F");
             var parameters = new Dictionary<string, string> { { "groupAddress", groupAddress } };
             var encodedContent = new FormUrlEncodedContent(parameters);
 
-            var requestMessage = new HttpRequestMessage( HttpMethod.Get, apiUrl + TelegramApiEnding + "?" + encodedContent);
+            var requestMessage = new HttpRequestMessage( HttpMethod.Get, apiUrl + TelegramApiEnding + "/?" + encodedContent);
 
             requestMessage.Content = new StringContent( "application/json");
 
@@ -271,11 +308,12 @@ namespace KnxService5
 
         //Procesy
 
-        private static async Task<KnxProcess> Postrocess(KnxProcess process)
+        private async Task<KnxProcess> Postrocess(KnxProcess process)
         {
             var result = new KnxProcess();
 
             var payload = JsonConvert.SerializeObject(process);
+            payload = payload.Replace("\\\"Pid\\\":null,", "");
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + ProcessApiEnding);
 
@@ -296,11 +334,11 @@ namespace KnxService5
             return result;
         }
 
-        private static async Task PutProcessUpadte(KnxProcess process) 
+        private async Task PutProcessUpadte(KnxProcess process) 
         {
             var payload = JsonConvert.SerializeObject(process);
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Put, apiUrl + ProcessApiEnding + process.Pid);
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, apiUrl + ProcessApiEnding +"/"+ process.Pid);
 
             requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
 
