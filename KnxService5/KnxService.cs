@@ -1,4 +1,8 @@
-﻿using System;
+﻿using KnxService5.Model;
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using Topshelf;
 using Topshelf.Logging;
@@ -13,6 +17,7 @@ namespace KnxService5
         static readonly LogWriter _log = HostLogger.Get<KnxService>();
 
         ApiService apiService = new ApiService();
+        KnxProcess process;
 
         public KnxService(bool throwOnStart, bool throwOnStop, bool throwUnhandled)
         {
@@ -20,6 +25,15 @@ namespace KnxService5
             _throwOnStop = throwOnStop;
             _throwUnhandled = throwUnhandled;
         }
+
+        public static IPAddress LocalIpAddress()
+        {
+            Func<IPAddress, bool> localIpPredicate = ip =>
+                ip.AddressFamily == AddressFamily.InterNetwork &&
+                ip.ToString().StartsWith("192.168"); //check only for 16-bit block
+            return Dns.GetHostEntry(Dns.GetHostName()).AddressList.LastOrDefault(localIpPredicate);
+        }
+
 
         public bool Start(HostControl hostControl)
         {
@@ -34,7 +48,16 @@ namespace KnxService5
                 _log.Info("Throwing as requested");
                 throw new InvalidOperationException("Throw on Start Requested");
             }
-            
+            var ip = LocalIpAddress();
+
+            process = new KnxProcess();
+            process.ProcessIp = ip.ToString();
+            process.ProcessName = "Test 24";
+            process.ProcessType = "XML-Handler";
+            process.ProcessedFile = "";
+            process.ActualTelegramNr = 0;
+            process.TotalTelegramNr = 0;
+            apiService.PostProcess(process);
 
             ThreadPool.QueueUserWorkItem(x =>
             {

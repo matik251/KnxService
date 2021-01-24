@@ -27,9 +27,9 @@ namespace KnxService5
                     {
                         xmlfile.IsProcessed = (xmlfile.IsProcessed == null ? 0 : xmlfile.IsProcessed.Value + 1);
                         service.UpdateXmlFile(xmlfile);
-                        if (xmlfile.TelegramsCount.HasValue)
+                        if (!xmlfile.TelegramsCount.HasValue)
                         {
-                            xmlfile.TelegramsCount = xmlfile.ToString().Where(c => c.Equals('<')).Count() - 2;
+                            xmlfile.TelegramsCount = xmlfile.Xmldata.ToString().Where(c => c.Equals('<')).Count() - 2;
                             service.UpdateProcessState(xmlfile.FileName, 0, (int)xmlfile.TelegramsCount);
                         }
                         var temp = ReadFileTelegrams(xmlfile, service);
@@ -43,6 +43,8 @@ namespace KnxService5
                 catch (Exception e)
                 {
                     _log.Error(e.Message);
+                    _log.Error("NoLogsToDecode");
+                    Thread.Sleep(300000);
                 }
             }
         }

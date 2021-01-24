@@ -23,7 +23,7 @@ namespace KnxService5
             httpClient = new HttpClient(handler);
         }
 
-        private KnxProcess knxProcess;
+        public KnxProcess knxProcess;
 
         const string apiUrl = @"https://192.168.1.200:1200";
 
@@ -117,7 +117,7 @@ namespace KnxService5
 
         private async Task<Xmlfile> GetXmlFileApi()
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiUrl + XmlApiEnding + "/GetNotProcessedXmlFiles");
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiUrl + XmlApiEnding + "/GetNotProcessedXmlFiles/0");
 
             requestMessage.Content = new StringContent("application/json");
 
@@ -141,7 +141,7 @@ namespace KnxService5
         {
             var payload = JsonConvert.SerializeObject(xmlfile);
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Put, apiUrl + XmlApiEnding);
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, apiUrl + XmlApiEnding + "/PutXmlFiles/" + xmlfile.Fid);
 
             requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
 
@@ -164,9 +164,9 @@ namespace KnxService5
         {
             var result = new KnxTelegram();
             var payload = JsonConvert.SerializeObject(telegram);
-            payload = payload.Replace("\\\"Tid\\\":null,","");
+            payload = payload.Replace("\"Tid\":null,", "");
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + TelegramApiEnding);
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + TelegramApiEnding + "/PostKnxTelegrams");
 
             requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
 
@@ -228,6 +228,7 @@ namespace KnxService5
                 return null;
             }
         }
+
 
         private async Task UpdateProcessedStateTelegram(KnxTelegram processed)
         {
@@ -313,7 +314,7 @@ namespace KnxService5
             var result = new KnxProcess();
 
             var payload = JsonConvert.SerializeObject(process);
-            payload = payload.Replace("\\\"Pid\\\":null,", "");
+            payload = payload.Replace("\"Pid\":null,", "");
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + ProcessApiEnding);
 
