@@ -30,6 +30,12 @@ namespace KnxService5
                 bool XmlReader = false;
                 bool TelegramDecoder = false;
 
+#if DEBUG
+                XmlReader = true;
+                TelegramDecoder = true;
+#endif
+
+
                 x.Service(settings => new KnxService(throwOnStart, throwOnStop, throwUnhandled, XmlReader, TelegramDecoder), s =>
                         {
                             s.BeforeStartingService(_ => Console.WriteLine("BeforeStart"));

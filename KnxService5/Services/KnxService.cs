@@ -27,8 +27,8 @@ namespace KnxService5
             _throwOnStart = throwOnStart;
             _throwOnStop = throwOnStop;
             _throwUnhandled = throwUnhandled;
-            XmlReader = this.XmlReader;
-            TelegramDecoder = this.TelegramDecoder;
+            this.XmlReader = XmlReader;
+            this.TelegramDecoder = TelegramDecoder;
         }
 
         public static IPAddress LocalIpAddress()
@@ -63,7 +63,7 @@ namespace KnxService5
             {
                 process.ProcessName = "XR+" + DateTime.Now.ToString();
                 process.ProcessType = "XmlReader";
-                process.ProcessedFile = "";
+                process.ProcessedFile = "Waiting";
                 process.ActualTelegramNr = 0;
                 process.TotalTelegramNr = 0;
                 apiService.PostProcess(process);
@@ -77,7 +77,7 @@ namespace KnxService5
             {
                 process.ProcessName = "TD+" + DateTime.Now.ToString();
                 process.ProcessType = "TelegramDecoder";
-                process.ProcessedFile = "";
+                process.ProcessedFile = "Waiting";
                 process.ActualTelegramNr = 0;
                 process.TotalTelegramNr = 0;
                 apiService.PostProcess(process);
