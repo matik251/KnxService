@@ -9,7 +9,7 @@ using Knx.Bus.Common;
 
 namespace KnxService5
 {
-    static class DataDecoder
+    public static class DataDecoder
     {
 
         public static DecodedTelegram GetDatapoint(ApiService service, KnxTelegram knxTelegram)
@@ -22,10 +22,11 @@ namespace KnxService5
 
                 try
                 {
+                    var addressDecoder = new AddressDecoder();
 
-                    var source = AddressDecoder.GetSourceAddress(GetBytes(13, 2, localByteArr));
+                    var source = addressDecoder.GetSourceAddress(GetBytes(13, 2, localByteArr));
 
-                    var group = AddressDecoder.GetGroupAddress(GetBytes(15, 2, localByteArr));
+                    var group = addressDecoder.GetGroupAddress(GetBytes(15, 2, localByteArr));
 
                     var data = DataPoint.GetData(GetData(localByteArr), group, service, knxTelegram);
 
@@ -52,18 +53,18 @@ namespace KnxService5
             return decodedTelegram;
         }
 
-        private static byte[] GetData(byte[] data)
+        public static byte[] GetData(byte[] data)
         {
-            return GetBytes(20, 21, data);
+            return GetBytes(20, 2, data);
         }
 
-        private static byte[] GetBytes(string data)
+        public static byte[] GetBytes(string data)
         {
             var returnBytes = new byte[] { };
             try
             {
                 var byteString = SplitByTwoBytes(data);
-                returnBytes = ByteArrayExtensions.ParseHexBytes(data);
+                returnBytes = ByteArrayExtensions.ParseHexBytes(byteString);
             }
             catch (Exception e)
             {
@@ -72,13 +73,13 @@ namespace KnxService5
         }
 
 
-        private static byte[] GetBytes(int? pos, int? len, string data)
+        public static byte[] GetBytes(int? pos, int? len, string data)
         {
             var returnBytes = new byte[] { };
             try
             {
                 var byteString = SplitByTwoBytes(data);
-                returnBytes = ByteArrayExtensions.ParseHexBytes(data);
+                returnBytes = ByteArrayExtensions.ParseHexBytes(byteString);
                 if (pos != null && len != null)
                 {
                     returnBytes = returnBytes.Skip((int)pos).Take((int)(len)).ToArray();
@@ -92,7 +93,7 @@ namespace KnxService5
         }
 
 
-        private static byte[] GetBytes(int? pos, int? len, byte[] data)
+        public static byte[] GetBytes(int? pos, int? len, byte[] data)
         {
             try
             {
@@ -108,7 +109,7 @@ namespace KnxService5
             return data;
         }
 
-        private static string SplitByTwoBytes(string data)
+        public static string SplitByTwoBytes(string data)
         {
             var byteString = "";
             if (data.Length % 2 == 0)

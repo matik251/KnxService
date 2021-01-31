@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace KnxService5
 {
-    static class AddressDecoder
+    public class AddressDecoder
     {
-        public static string GetSourceAddress(byte[] data)
+        public string GetSourceAddress(byte[] data)
         {
             var connection = new KnxConnectionRouting();
             var tempBytes = GetAddres1(data);
@@ -24,7 +24,7 @@ namespace KnxService5
             return returnVal;
         }
 
-        public static string GetGroupAddress(byte[] data)
+        public string GetGroupAddress(byte[] data)
         {
             var connection = new KnxConnectionRouting();
             var tempBytes = GetSource1(data);
