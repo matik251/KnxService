@@ -18,17 +18,19 @@ namespace KnxService5
 
         public bool XmlReader = false;
         public bool TelegramDecoder = false;
+        public string ServerUrl = "https://192.168.1.200:1200";
 
         ApiService apiService = new ApiService();
         KnxProcess process;
 
-        public KnxService(bool throwOnStart, bool throwOnStop, bool throwUnhandled, bool XmlReader, bool TelegramDecoder)
+        public KnxService(bool throwOnStart, bool throwOnStop, bool throwUnhandled, bool XmlReader, bool TelegramDecoder, string ServerUrl)
         {
             _throwOnStart = throwOnStart;
             _throwOnStop = throwOnStop;
             _throwUnhandled = throwUnhandled;
             this.XmlReader = XmlReader;
             this.TelegramDecoder = TelegramDecoder;
+            this.ServerUrl = ServerUrl;
         }
 
         public static IPAddress LocalIpAddress()
@@ -54,7 +56,7 @@ namespace KnxService5
                 throw new InvalidOperationException("Throw on Start Requested");
             }
             var ip = LocalIpAddress();
-
+            apiService.apiUrl = ServerUrl;
 
             process = new KnxProcess();
             process.ProcessIp = ip.ToString();

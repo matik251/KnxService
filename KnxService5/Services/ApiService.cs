@@ -12,7 +12,6 @@ namespace KnxService5
 {
     public class ApiService 
     {
-
         HttpClient httpClient;
 
         public ApiService()
@@ -25,7 +24,7 @@ namespace KnxService5
 
         public KnxProcess knxProcess;
 
-        const string apiUrl = @"https://192.168.1.200:1200";
+        public string apiUrl = @"https://192.168.1.200:1200";
 
         const string XmlApiEnding = @"/api/XmlFiles";
         const string TelegramApiEnding = @"/api/KnxTelegrams";
