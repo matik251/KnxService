@@ -28,8 +28,9 @@ namespace KnxService5
 
         const string XmlApiEnding = @"/api/XmlFiles";
         const string TelegramApiEnding = @"/api/KnxTelegrams";
+        const string GroupApiEnding = @"/api/KnxGroupAddresses/GetKnxGroupAddressesByGroupAddress";
         const string ProcessApiEnding = @"/api/KnxProcesses";
-        const string DecodedTelegramApiEnding = @"/api/DecodedTelegrams";
+        const string DecodedTelegramApiEnding = @"/api/DecodedTelegrams/PostDecodedTelegrams";
 
         #region Methods XML Handler
 
@@ -255,26 +256,30 @@ namespace KnxService5
 
         private async Task<DecodedTelegram> PostDecodedTelegramApi(DecodedTelegram telegram)
         {
-            var result = new DecodedTelegram();
-            var payload = JsonConvert.SerializeObject(telegram);
-
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + DecodedTelegramApiEnding);
-
-            requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
-
-            var responseMessage = await httpClient.SendAsync(requestMessage);
-
-            if (responseMessage.IsSuccessStatusCode)
+            if (telegram.GroupAddress != null)
             {
-                var resultString = await responseMessage.Content.ReadAsStringAsync();
-                result = JsonConvert.DeserializeObject<DecodedTelegram>(resultString);
-            }   
-            else
-            {
-                // Handle error result
-                throw new Exception();
+                var result = new DecodedTelegram();
+                var payload = JsonConvert.SerializeObject(telegram);
+
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl + DecodedTelegramApiEnding);
+
+                requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+                var responseMessage = await httpClient.SendAsync(requestMessage);
+
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    var resultString = await responseMessage.Content.ReadAsStringAsync();
+                    result = JsonConvert.DeserializeObject<DecodedTelegram>(resultString);
+                }
+                else
+                {
+                    // Handle error result
+                    throw new Exception(responseMessage.ToString());
+                }
+                return result;
             }
-            return result;
+            return null;
         }
 
         //Adres Grupowy
@@ -286,7 +291,7 @@ namespace KnxService5
             var parameters = new Dictionary<string, string> { { "groupAddress", groupAddress } };
             var encodedContent = new FormUrlEncodedContent(parameters);
 
-            var requestMessage = new HttpRequestMessage( HttpMethod.Get, apiUrl + TelegramApiEnding + "/?" + encodedContent);
+            var requestMessage = new HttpRequestMessage( HttpMethod.Get, apiUrl + GroupApiEnding + "/?groupAddress=" + groupAddress);
 
             requestMessage.Content = new StringContent( "application/json");
 
@@ -300,7 +305,8 @@ namespace KnxService5
             else
             {
                 // Handle error result
-                throw new Exception();
+                //throw new Exception(responseMessage.ReasonPhrase.ToString());
+
             }
             return result;
         }

@@ -35,6 +35,8 @@ namespace KnxService5
                     {
                         knxTelegram.Processed = 1;
                         service.PutKnaTelegram(knxTelegram);
+                        decoded.Tid = (long)knxTelegram.Tid;
+
                         service.PostDecodedTelegram(decoded);
                     }
                     catch (Exception e)

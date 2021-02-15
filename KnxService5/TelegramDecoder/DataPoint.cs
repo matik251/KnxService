@@ -11,11 +11,11 @@ namespace KnxService5
 {
     public class DataPoint
     {
-        public static DecodedTelegram GetData(byte[] data, string groupAddres, ApiService service, KnxTelegram telegram)
+        public static DecodedTelegram GetData(byte[] data, KnxGroupAddress groupAddres, ApiService service, KnxTelegram telegram)
         {
             var returnTelegram = new DecodedTelegram();
 
-            var datpointInfo = DataPointsDictionary.Where(d => d.Key.Equals(groupAddres)).FirstOrDefault();
+            var datpointInfo = DataPointsDictionary.Where(d => d.Key.Equals(groupAddres.Length)).FirstOrDefault();
 
             var connection = new KnxConnectionRouting();
             
@@ -26,7 +26,14 @@ namespace KnxService5
             }
 
             returnTelegram.Data = decodedData.ToString();
-            returnTelegram.DataFloat = (float)decodedData;
+            try
+            {
+                returnTelegram.DataFloat = (float)decodedData;
+            }
+            catch(Exception e)
+            {
+                returnTelegram.DataFloat = 0.0f;
+            }
             returnTelegram.SerializedData = JsonConvert.SerializeObject(decodedData);
 
             return returnTelegram;

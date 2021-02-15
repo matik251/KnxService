@@ -20,7 +20,7 @@ namespace KnxService5
             tempBytes = GetAddres3(data);
             var third = connection.FromDataPoint("5.010", tempBytes);
 
-            var returnVal = first + "/" + second + "/" + tempBytes;
+            var returnVal = first + "/" + second + "/" + third;
             return returnVal;
         }
 
@@ -34,7 +34,7 @@ namespace KnxService5
             tempBytes = GetAddres3(data);
             var third = connection.FromDataPoint("5.010", tempBytes);
 
-            var returnVal = first + "/" + second + "/" + tempBytes;
+            var returnVal = first + "/" + second + "/" + third;
             return returnVal;
         }
 

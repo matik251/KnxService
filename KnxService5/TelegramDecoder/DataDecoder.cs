@@ -17,7 +17,7 @@ namespace KnxService5
             var decodedTelegram = new DecodedTelegram();
 
             var localByteArr = GetBytes(knxTelegram.RawData);
-            if (localByteArr.Length == 44)
+            if (localByteArr.Length >= 20)
             {
 
                 try
@@ -28,7 +28,9 @@ namespace KnxService5
 
                     var group = addressDecoder.GetGroupAddress(GetBytes(15, 2, localByteArr));
 
-                    var data = DataPoint.GetData(GetData(localByteArr), group, service, knxTelegram);
+                    var datapoint = service.GetGroupAddressInfo(group);
+
+                    var data = DataPoint.GetData(GetData(localByteArr), datapoint, service, knxTelegram);
 
                     decodedTelegram.Timestamp = knxTelegram.Timestamp;
                     decodedTelegram.TimestampS = knxTelegram.TimestampS;
@@ -55,7 +57,19 @@ namespace KnxService5
 
         public static byte[] GetData(byte[] data)
         {
+<<<<<<< Updated upstream
             return GetBytes(20, 2, data);
+=======
+            var ret = GetBytes(1, 1, data);
+            if (data.Length == 20)
+            {
+                ret = GetBytes(17, 2, data);
+            }else if(data.Length == 21)
+            {
+                ret = GetBytes(18, 2, data);
+            }
+            return ret;
+>>>>>>> Stashed changes
         }
 
         public static byte[] GetBytes(string data)
