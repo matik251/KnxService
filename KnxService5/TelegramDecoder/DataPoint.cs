@@ -22,7 +22,7 @@ namespace KnxService5
             var decodedData = connection.FromDataPoint(datpointInfo.Value, data);
             if(decodedData == null)
             {
-                connection.FromDataPoint("5.010", data);
+                decodedData = connection.FromDataPoint("5.010", data);
             }
 
             returnTelegram.Data = decodedData.ToString();

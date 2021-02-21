@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KnxService5", "KnxService5\KnxService5.csproj", "{6ED5C685-D078-4BDB-9B17-F7797149D131}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnxServiceTest", "KnxServiceTest\KnxServiceTest.csproj", "{B7A625C3-28BE-4EB8-8B1D-C5937B23CF80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KnxServiceTest", "KnxServiceTest\KnxServiceTest.csproj", "{B7A625C3-28BE-4EB8-8B1D-C5937B23CF80}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

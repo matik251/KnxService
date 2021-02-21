@@ -57,9 +57,6 @@ namespace KnxService5
 
         public static byte[] GetData(byte[] data)
         {
-<<<<<<< Updated upstream
-            return GetBytes(20, 2, data);
-=======
             var ret = GetBytes(1, 1, data);
             if (data.Length == 20)
             {
@@ -68,8 +65,11 @@ namespace KnxService5
             {
                 ret = GetBytes(18, 2, data);
             }
+            else if (data.Length == 22)
+            {
+                ret = GetBytes(19, 2, data);
+            }
             return ret;
->>>>>>> Stashed changes
         }
 
         public static byte[] GetBytes(string data)
