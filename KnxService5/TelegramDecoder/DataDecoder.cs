@@ -67,7 +67,7 @@ namespace KnxService5
             }
             else if (data.Length == 22)
             {
-                ret = GetBytes(19, 2, data);
+                ret = GetBytes(20, 1, data);
             }
             return ret;
         }

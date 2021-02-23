@@ -32,8 +32,8 @@ namespace KnxService5
                 string ServerUrl = "https://192.168.1.200:1200";
 
 #if DEBUG
-                XmlReader = false;
-                TelegramDecoder = true;
+                XmlReader = true;
+                TelegramDecoder = false;
 #endif
 
 

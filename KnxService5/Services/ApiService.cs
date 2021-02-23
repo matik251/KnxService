@@ -224,7 +224,7 @@ namespace KnxService5
             else
             {
                 // Handle error result
-                throw new Exception();
+                throw new Exception("brak telegramów");
                 return null;
             }
         }

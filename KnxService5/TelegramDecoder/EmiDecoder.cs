@@ -15,12 +15,17 @@ namespace KnxService5
 
         public static void ProcessTelegrams(ApiService service)
         {
+            var idle = false;
             while (true)
             {
                 KnxTelegram knxTelegram = null;
                 DecodedTelegram decoded = null;
                 try
                 {
+                    if(idle == true)
+                    {
+                        _log.Error("Back to decoding");
+                    }
                     knxTelegram = service.GetKnxTelegramToDecode();
 
                     decoded = DecodeEmi(knxTelegram, service);
@@ -31,6 +36,7 @@ namespace KnxService5
                 }
                 if (knxTelegram != null)
                 {
+                    idle = false;
                     try
                     {
                         knxTelegram.Processed = 1;
@@ -47,7 +53,8 @@ namespace KnxService5
                 else
                 {
                     _log.Error("NoLogsToDecode");
-                    Thread.Sleep(300000);
+                    idle = true;
+                    Thread.Sleep(10000);
                 }
             }
         }

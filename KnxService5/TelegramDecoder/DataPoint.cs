@@ -18,7 +18,7 @@ namespace KnxService5
             var datpointInfo = DataPointsDictionary.Where(d => d.Key.Equals(groupAddres.Length)).FirstOrDefault();
 
             var connection = new KnxConnectionRouting();
-            
+
             var decodedData = connection.FromDataPoint(datpointInfo.Value, data);
             if(decodedData == null)
             {
